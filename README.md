@@ -66,3 +66,16 @@ test <- for_wilcox(data_1,data_2,
 + `result$up`存放的是p value < 0.05且logFC > 0的结果
 + `result$down`存放的是p value < 0.05且logFC < 0的结果
 
+
+
+## 更新记录
+
+### V1.0.1
+
++ 增加p值矫正功能，增加参数 `p_adj_method`，默认为`fdr`方法。
++ 增加`wilcox.test()`中的`exact`选项开关，增加参数 `wilcox_exact`，默认为`NULL`。
+
+### v1.0
+
+首次提交，包含示例数据`data_1.rdata`、`data_2.rdata`和`group_AHR.rdata`，以及函数文件`for_wilcox.R`。
+

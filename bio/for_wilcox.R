@@ -1,5 +1,5 @@
 ## differential analysis ----
-for_wilcox <- function(data_1, data_2, group,by ="group",dir = getwd()) {
+for_wilcox <- function(data_1, data_2, group,by ="group",wilcox_exact = NULL,p_adj_method = "fdr",dir = getwd()) {
   data_1 <- as.data.frame(t(data_1))
   data_2 <- as.data.frame(t(data_2))
 
@@ -28,18 +28,30 @@ for_wilcox <- function(data_1, data_2, group,by ="group",dir = getwd()) {
   
   merge_data_2 <- subset(merge_data_all,merge_data_all$group == levels(merge_data_all$group)[2])
   
+  length_result <- length(merge_data_all)-length(colnames(group))
   
-  result_all <- data.frame(id = 1:(length(merge_data_all)-length(colnames(group))))
+  result_all <- data.frame(id = 1:length_result,
+                           gene = rep(0,length_result),
+                           mean_data_1 = rep(0,length_result),
+                           mean_data_2 = rep(0,length_result),
+                           logFC = rep(0,length_result),
+                           pvalue = rep(0,length_result),
+                           adjp = rep(0,length_result)
+                           )
   
   for(i in col_num:length(merge_data_all)){
-    a <- wilcox.test(merge_data_all[,i] ~ group,data = merge_data_all)
-    result_all$gene[i-length(colnames(group))] <- colnames(merge_data_all)[i]
-    result_all$pvalue[i-length(colnames(group))] <- a[["p.value"]]
-    result_all$mean_data_1[i-length(colnames(group))] <- mean(merge_data_1[,i])
-    result_all$mean_data_2[i-length(colnames(group))] <- mean(merge_data_2[,i])
-    result_all$logFC[i-length(colnames(group))] <- result_all$mean_data_1[i-length(colnames(group))]-result_all$mean_data_2[i-length(colnames(group))]
+    a <- wilcox.test(merge_data_all[,i] ~ group,data = merge_data_all,exact = exact)
+    j <- i-length(colnames(group))
+    result_all$gene[j] <- colnames(merge_data_all)[i]
+    result_all$pvalue[j] <- a[["p.value"]]
+    result_all$mean_data_1[j] <- mean(merge_data_1[,i])
+    result_all$mean_data_2[j] <- mean(merge_data_2[,i])
+    result_all$logFC[j] <- result_all$mean_data_1[j]-result_all$mean_data_2[j]
     print(i/length(merge_data_all))
-    }
+  }
+  result_all <- result_all[order(result_all$pvalue),]
+  adjp <- p.adjust(result_all$pvalue,method = p_adj_method)
+  result_all$adjp <- adjp
   
   nrow(subset(result_all,abs(result_all$logFC) > sd(result_all$logFC)*3))
   result <- list(all = result_all,
