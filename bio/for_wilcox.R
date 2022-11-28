@@ -1,7 +1,7 @@
 ## differential analysis ----
 for_wilcox <- function(data_1, data_2, group,by ="group",wilcox_exact = NULL,p_adj_method = "fdr",dir = getwd()) {
-  data_1 <- as.data.frame(t(data_1))
-  data_2 <- as.data.frame(t(data_2))
+  data_1 <- as.data.frame(data_1)
+  data_2 <- as.data.frame(data_2)
 
   data_1$id <- rownames(data_1)
   data_2$id <- rownames(data_2)
@@ -40,7 +40,7 @@ for_wilcox <- function(data_1, data_2, group,by ="group",wilcox_exact = NULL,p_a
                            )
   
   for(i in col_num:length(merge_data_all)){
-    a <- wilcox.test(merge_data_all[,i] ~ group,data = merge_data_all,exact = exact)
+    a <- wilcox.test(merge_data_all[,i] ~ group,data = merge_data_all,exact = wilcox_exact)
     j <- i-length(colnames(group))
     result_all$gene[j] <- colnames(merge_data_all)[i]
     result_all$pvalue[j] <- a[["p.value"]]
@@ -53,7 +53,6 @@ for_wilcox <- function(data_1, data_2, group,by ="group",wilcox_exact = NULL,p_a
   adjp <- p.adjust(result_all$pvalue,method = p_adj_method)
   result_all$adjp <- adjp
   
-  nrow(subset(result_all,abs(result_all$logFC) > sd(result_all$logFC)*3))
   result <- list(all = result_all,
                  fill_pvalue = subset(result_all,
                                       result_all$pvalue < 0.05),
@@ -61,7 +60,6 @@ for_wilcox <- function(data_1, data_2, group,by ="group",wilcox_exact = NULL,p_a
                              result_all$pvalue < 0.05&result_all$logFC > 0),
                  down = subset(result_all,
                              result_all$pvalue < 0.05&result_all$logFC < 0))
-  
   cat(paste0("up:    ",
              nrow(subset(result_all,
                            result_all$logFC>0&result_all$pvalue < 0.05)),
@@ -75,6 +73,7 @@ for_wilcox <- function(data_1, data_2, group,by ="group",wilcox_exact = NULL,p_a
                          result_all$pvalue>0.05))))
   write.csv(result$all,file = paste0(dir,'result_all.csv'))
   write.csv(result$fill_pvalue,file = paste0(dir,'result.csv'))
+  save(result,file = paste0(dir,'result.rdata'))
   return(result)
 }
 
