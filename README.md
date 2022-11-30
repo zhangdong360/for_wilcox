@@ -8,7 +8,7 @@
 
 也可以在Rstudio中打开此脚本，运行脚本内的`function()`函数进行载入。
 
-# 数据要求
+## 数据要求
 
 ### data数据要求
 
@@ -28,10 +28,20 @@ by参数的默认值为*group*。
 
 需注意：
 
-+ sample_ID需与`data1`和`data2`的colnames对应。
-+ group列建议转化为factor格式，并检查level的顺序，使得实验组在前，对照组在后。转化factor的函数为`factor(group_AHR$type,levels = c("AHR","NO_AHR"))`
++ **sample_ID**需与`data1`和`data2`的*colnames*对应。
++ **group**列建议转化为factor格式，并检查level的顺序，使得实验组在前，对照组在后。转化factor的函数为`factor(group_AHR$type,levels = c("AHR","NO_AHR"))`
 
+## 参数说明
 
++ `data_1` 数据1
++ `data_2` 数据2
++ `group` 分组信息
++ `by` 分组信息列名
++ `wilcox_exact` wilcox.test中exact开关控制
++ `use_adjust_p` 是否进行pvalue的矫正
++ `p_adj_method` adjp方法
++ `logFC_cut_off` logFC的cutoff值设置
++ `dir` 结果目录
 
 ### 其他
 
@@ -62,18 +72,31 @@ test <- for_wilcox(data_1,data_2,
 其中
 
 + `result$all`存放的是全部的差异分析结果
-+ `result$fill_pvalue`存放的是根据p value < 0.05进行筛选后的结果
++ `result$filter_pvalue`存放的是根据选择，对pvalue或adjpvalue < 0.05 进行筛选后的结果
++ `result$filter_pvalue_cutoff`在`result$filter_pvalue`的基础上，根据`logFC_cut_off`的设置，进行logFC的筛选
 + `result$up`存放的是p value < 0.05且logFC > 0的结果
 + `result$down`存放的是p value < 0.05且logFC < 0的结果
++ `result$data`存放的是data_1和data_2的list
++ `result$group`存放的是`group`数据框
++ `result$wilcox.test_exact`存放的是logical value，表示是否采用exact，默认*NULL*
++ `use_adjust_p` logical value，表示是否对pvalue进行矫正，默认*TRUE*
++ `logFC_cutoff`表示logFC的cutoff值为多少，默认*0*
++ `p_adj_method`表示pvalue的矫正方法，默认*fdr*
 
 
 
 ## 更新记录
 
+### V1.0.2
+
++ 增加logFC的cutoff值设置，增加参数`logFC_cut_off`，默认为*0*。
++ 增加p值矫正开关，增加参数`use_adjust_p`，默认为*TRUE*。
++ 增加任务进度显示条，显示当前进程和总进程数，以及预计完成时间。（依赖**progress**包）
+
 ### V1.0.1
 
-+ 增加p值矫正功能，增加参数 `p_adj_method`，默认为`fdr`方法。
-+ 增加`wilcox.test()`中的`exact`选项开关，增加参数 `wilcox_exact`，默认为`NULL`。
++ 增加p值矫正功能，增加参数 `p_adj_method`，默认为*fdr*方法。
++ 增加`wilcox.test()`中的`exact`选项开关，增加参数 `wilcox_exact`，默认为*NULL*。
 
 ### v1.0
 
