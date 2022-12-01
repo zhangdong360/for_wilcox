@@ -1,7 +1,7 @@
 ## differential analysis ----
 for_wilcox <- function(data_1, data_2, group,by ="group",
                        wilcox_exact = NULL,use_adjust_p = T, 
-                       p_adj_method = "fdr", dir = getwd(),logFC_cut_off = 0) {
+                       p_adj_method = "fdr", logFC_cut_off = 0, dir = getwd()) {
   library(progress)
   data_1 <- as.data.frame(data_1)
   data_2 <- as.data.frame(data_2)
@@ -43,12 +43,13 @@ for_wilcox <- function(data_1, data_2, group,by ="group",
                            pvalue = rep(0,length_result),
                            adjp = rep(0,length_result)
                            )
-  # wilcox.test
+
   pb <- progress_bar$new(
     format = "  wilcox.test [:bar] :current/:total :percent eta: :eta",
     total = length(merge_data_all)-length(colnames(group)), 
     clear = FALSE, 
     width= 60)
+  # wilcox.test
   for(i in col_num:length(merge_data_all)){
     a <- wilcox.test(merge_data_all[,i] ~ group,
                      data = merge_data_all,
@@ -82,7 +83,7 @@ for_wilcox <- function(data_1, data_2, group,by ="group",
                    wilcox.test_exact = wilcox_exact,
                    use_adjust_p = T,
                    logFC_cutoff = logFC_cut_off,
-                   p_adj_method = p_adj_method,
+                   p_adj_method = p_adj_method
     )
     cat(paste0("up:    ",
                nrow(subset(result_all,
@@ -126,7 +127,7 @@ for_wilcox <- function(data_1, data_2, group,by ="group",
                            result_all$pvalue>0.05))))
   }
   write.csv(result$all,file = paste0(dir,'result_all.csv'))
-  write.csv(result$fill_pvalue,file = paste0(dir,'result.csv'))
+  write.csv(result$filter_pvalue,file = paste0(dir,'result.csv'))
   save(result,file = paste0(dir,'result.rdata'))
   return(result)
 }
